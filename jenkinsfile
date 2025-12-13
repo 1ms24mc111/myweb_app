@@ -1,52 +1,46 @@
 pipeline {
     agent any
-
     environment {
-        
-        DOCKER_IMAGE_NAME = 'vivek5041/myweb_app'
-        DOCKER_REGISTRY = 'docker.io'
+        DOCKERHUB_CRED=credentials('dockerhub')
+        IMAGE_NAME="docker vivek5041/myweb_app:tagname"
     }
-
+    
     stages {
-        stage('Checkout Source Code') {
+        stage('checkout') {
             steps {
-              
-                git branch: 'main', url: 'git@github.com:1ms24mc111/myweb_app.git'
+                git url:'git@github.com:1ms24mc111/myweb_app.git', branch:'main' 
             }
         }
-
-        stage('Building and Tagging Docker Image') {
-            
+        
+        stage('Build Docker Image') {
             steps {
                 script {
-                   
-                    sh "docker build -t docker.io/vivek5041/myweb_app:1.0 ."
-
-                    
-                    sh "docker tag docker.io/vivek5041/myweb_app:1.0 docker.io/vivek5041/myweb_app:1.0"
+                    dockerImage=docker.build("${IMAGE_NAME}:latest")
                 }
             }
         }
-
-        stage('Pushing Docker Image') {
+        
+        stage('Push to DockerHub') {
             steps {
                 script {
-            
-                    sh "docker push docker.io/vivek5041/myweb_app:1.0"
-                    sh "docker.io/vivek5041/myweb_app:1.0"
+                    docker.withRegistry('https://index.docker.io/v1/','dockerhub') {
+                        dockerImage.push()
+                    }
                 }
             }
         }
     }
-
+    
     post {
-   
         success {
-            echo "Pipeline Succeeded!"
+            echo "Pipeline Successful"
         }
         failure {
-            echo "Pipeline Failed!"
+            echo "Pipeline Failed"
         }
-       
+        always {
+            echo "Cleaning Up WorkSpace"
+            deleteDir()
+        }
     }
 }
