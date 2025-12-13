@@ -1,9 +1,10 @@
 pipeline {
     agent any
     environment {
-        DOCKERHUB_CRED=credentials('dockerhub')
-        IMAGE_NAME="docker vivek5041/myweb_app:tagname"
-    }
+    DOCKERHUB_CRED=credentials('dockerhub')
+    IMAGE_NAME="vivek5041/myweb_app" // Corrected format
+    IMAGE_TAG="${env.BUILD_NUMBER}"  // Use build number for unique tag
+}
     
     stages {
         stage('checkout') {
@@ -13,12 +14,13 @@ pipeline {
         }
         
         stage('Build Docker Image') {
-            steps {
-                script {
-                    dockerImage=docker.build("${IMAGE_NAME}:latest")
-                }
-            }
+    steps {
+        script {
+            // Build using the correct name and tag
+            dockerImage = docker.build("${IMAGE_NAME}:${IMAGE_TAG}") 
         }
+    }
+}
         
         stage('Push to DockerHub') {
             steps {
