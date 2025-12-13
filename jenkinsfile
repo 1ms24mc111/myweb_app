@@ -1,23 +1,13 @@
 pipeline {
     agent any
     environment {
-        // IMPORTANT: The ID 'dockerhub' must exactly match the ID of the 
-        // Username with password credential in Jenkins.
-        DOCKERHUB_CRED = 'dockerhub'
-        
-        // Define the image name using the correct format
-        IMAGE_NAME = "vivek5041/myweb_app"
-        
-        // Use the build number for a unique tag (recommended)
-        IMAGE_TAG = "${env.BUILD_NUMBER}" 
+        DOCKERHUB_CRED=credentials('dockerhub')
+        IMAGE_NAME="<docker_hub_username>/<docker_hub_repo_name>"
     }
     
     stages {
-        stage('Checkout Source Code') {
+        stage('checkout') {
             steps {
-                // NOTE: If using an SSH URL like 'git@github.com:...', 
-                // you must configure the SSH key credential in Jenkins.
-                // Replace '<github_repo_ssh_url>' with your actual SSH URL.
                 git url:'<github_repo_ssh_url>', branch:'main' 
             }
         }
@@ -25,9 +15,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Builds the image and tags it using the defined variables
-                    dockerImage = docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
-                    echo "Built Docker Image: ${IMAGE_NAME}:${IMAGE_TAG}"
+                    dockerImage=docker.build("${IMAGE_NAME}:latest")
                 }
             }
         }
@@ -35,10 +23,8 @@ pipeline {
         stage('Push to DockerHub') {
             steps {
                 script {
-                    // Uses the defined DOCKERHUB_CRED ID to log into Docker Hub
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CRED) {
+                    docker.withRegistry('https://index.docker.io/v1/','dockerhub') {
                         dockerImage.push()
-                        echo "Pushed Image to DockerHub successfully."
                     }
                 }
             }
@@ -46,18 +32,14 @@ pipeline {
     }
     
     post {
-        // Runs only if the overall pipeline status is SUCCESS
         success {
-            echo "Pipeline Successful: Image ${IMAGE_NAME}:${IMAGE_TAG} deployed."
+            echo "Pipeline Successful"
         }
-        // Runs only if the overall pipeline status is FAILURE
         failure {
-            echo "Pipeline Failed: Check Docker credentials or build logs."
+            echo "Pipeline Failed"
         }
-        // Always runs, regardless of status
         always {
             echo "Cleaning Up WorkSpace"
-            // The deleteDir step is correctly placed here without extra 'script' or 'node' wrappers.
             deleteDir()
         }
     }
