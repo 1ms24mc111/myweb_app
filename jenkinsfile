@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('checkout') {
             steps {
-                git url:'<github_repo_ssh_url>', branch:'main' 
+                git url:'git@github.com:1ms24mc111/myweb_app.git', branch:'master' 
             }
         }
         
