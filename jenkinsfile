@@ -32,15 +32,15 @@ pipeline {
     }
     
     post {
-        success {
-            echo "Pipeline Successful"
-        }
-        failure {
-            echo "Pipeline Failed"
-        }
-        always {
-            echo "Cleaning Up WorkSpace"
-            deleteDir()
+    always {
+        // Run the cleanup steps inside an explicit 'script' block
+        // to ensure the 'deleteDir' step has the required 'node' context.
+        script {
+            node {
+                echo 'Cleaning Up WorkSpace'
+                deleteDir()
+            }
         }
     }
+}
 }
