@@ -1,0 +1,52 @@
+pipeline {
+    agent any
+
+    environment {
+        
+        DOCKER_IMAGE_NAME = 'vivek5041/myweb_app'
+        DOCKER_REGISTRY = 'docker.io'
+    }
+
+    stages {
+        stage('Checkout Source Code') {
+            steps {
+              
+                git branch: 'main', url: 'git@github.com:1ms24mc111/myweb_app.git'
+            }
+        }
+
+        stage('Building and Tagging Docker Image') {
+            
+            steps {
+                script {
+                   
+                    sh "docker build -t docker.io/vivek5041/myweb_app:1.0 ."
+
+                    
+                    sh "docker tag docker.io/vivek5041/myweb_app:1.0 docker.io/vivek5041/myweb_app:1.0"
+                }
+            }
+        }
+
+        stage('Pushing Docker Image') {
+            steps {
+                script {
+            
+                    sh "docker push docker.io/vivek5041/myweb_app:1.0"
+                    sh "docker.io/vivek5041/myweb_app:1.0"
+                }
+            }
+        }
+    }
+
+    post {
+   
+        success {
+            echo "Pipeline Succeeded!"
+        }
+        failure {
+            echo "Pipeline Failed!"
+        }
+       
+    }
+}
