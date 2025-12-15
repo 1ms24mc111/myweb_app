@@ -1,2 +1,7 @@
+<<<<<<< HEAD
 flask
 
+=======
+Flask==2.3.2
+gunicorn
+>>>>>>> 26e96ce (intital)
